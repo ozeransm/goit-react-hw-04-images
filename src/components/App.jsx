@@ -41,29 +41,30 @@ const initialState={
     
 }
 export const App = ()=>{
-
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  
+  const getImagePage = ()=>{
+    try{
+      getImage(state.isQuery, state.page)
+      .then(({data})=>{
+            const objImg = data.hits.map((el)=>({id: nanoid(), webformatURL: el.webformatURL, largeImageURL: el.largeImageURL}));
+            dispatch({objImg: {objImg:[...state.objImg, ...objImg], totalPage: data.totalHits, isLoading: false}});
+            
+          });
+    }catch(error){
+      console.log(error);
+      dispatch({error});
+      
+    }
+  }
   useEffect(()=>{
     if(state.isQuery){
       dispatch({isLoading: true})
-        setTimeout(()=>{
-        try{
-          getImage(state.isQuery, 1)
-          .then(({data})=>{
-            const objImg = data.hits.map((el)=>({id: nanoid(), webformatURL: el.webformatURL, largeImageURL: el.largeImageURL}));
-            dispatch({objImg: {objImg, totalPage: data.totalHits, isLoading: false, page: 1}});
-            
-          });
-        }catch(error){
-          console.log(error);
-          dispatch({error});
-          
-        }
-        
-        },500);
-      }
-  },[state.isQuery]);
+      getImagePage();
+       
+    }
+      
+  },[state.isQuery, state.page]);
 
   const handleSubmit=(query)=>{
         dispatch({query});
@@ -78,26 +79,9 @@ export const App = ()=>{
                 }
               }
   const handlerLoadMore=(e)=>{
-                e.preventDefault();
-                e.target.setAttribute('disabled','');
                 dispatch({page: state.page+1});
                 dispatch({isLoading: true})
-                setTimeout(()=>{
-                  try{
-                    getImage(state.isQuery, state.page)
-                    .then(({data})=>{
-                      const objImg = data.hits.map((el)=>({id: nanoid(), webformatURL: el.webformatURL, largeImageURL: el.largeImageURL}));
-                      dispatch({objImg: {objImg:[...state.objImg, ...objImg], totalPage: data.totalHits, isLoading: false}});
-                      
-                    });
-                  }catch(error){
-                    console.log(error);
-                    dispatch({error});
-                    
-                  }finally{
-                    e.target.removeAttribute('disabled','');
-                  }
-              },500);
+               
               }
   return(
     <>
