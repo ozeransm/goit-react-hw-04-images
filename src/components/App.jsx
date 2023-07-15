@@ -15,7 +15,7 @@ function reducer(state, action) {
   
   switch (Object.keys(action)[0]) {
     case 'query': 
-      return {...state, ...{isQuery: action.query}, ...{objImg: []}};
+      return {...state, ...{isQuery: action.query}, ...{objImg: []}, ...{page: 1}};
     case 'objImg':
       return {...state, ...action.objImg};
     case 'isModalOpen': 
