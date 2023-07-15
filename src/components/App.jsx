@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef} from "react";
 import { nanoid } from 'nanoid'
 import { getImage } from "./Api";
 import { ImageGallery } from "./ImageGallery";
@@ -40,9 +40,11 @@ const initialState={
     totalPage: 0,
     
 }
+
+
 export const App = ()=>{
   const [state, dispatch] = useReducer(reducer, initialState);
-  
+  const btn = useRef(null);
   const getImagePage = ()=>{
     try{
       getImage(state.isQuery, state.page)
@@ -57,18 +59,20 @@ export const App = ()=>{
       
     }
   }
+  
   useEffect(()=>{
     if(state.isQuery){
-      dispatch({isLoading: true})
-      getImagePage();
-       
-    }
+       dispatch({isLoading: true});
       
+       getImagePage();
+       btn.current?.removeAttribute('disabled');
+    }
+// eslint-disable-next-line
   },[state.isQuery, state.page]);
 
-  const handleSubmit=(query)=>{
-        dispatch({query});
-      }
+  function handleSubmit(query) {
+    dispatch({ query });
+  }
   const handlerOpenImg=(id)=>{
           dispatch({isModalOpen: id});
             
@@ -79,9 +83,12 @@ export const App = ()=>{
                 }
               }
   const handlerLoadMore=(e)=>{
+                btn.current = e.target;              
                 dispatch({page: state.page+1});
                 dispatch({isLoading: true})
-               
+                btn.current.setAttribute('disabled','');
+                btn.current.blur();
+
               }
   return(
     <>
