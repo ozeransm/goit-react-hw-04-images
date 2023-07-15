@@ -14,8 +14,8 @@ const modal = document.getElementById('modal');
 function reducer(state, action) {
   
   switch (Object.keys(action)[0]) {
-    case 'query':
-      return {...state, ...{isQuery: action.query}};
+    case 'query': 
+      return {...state, ...{isQuery: action.query}, ...{objImg: []}};
     case 'objImg':
       return {...state, ...action.objImg};
     case 'isModalOpen': 
@@ -62,10 +62,9 @@ export const App = ()=>{
   
   useEffect(()=>{
     if(state.isQuery){
-       dispatch({isLoading: true});
-      
-       getImagePage();
-       btn.current?.removeAttribute('disabled');
+      dispatch({isLoading: true});
+      getImagePage();
+      btn.current?.removeAttribute('disabled');
     }
 // eslint-disable-next-line
   },[state.isQuery, state.page]);
