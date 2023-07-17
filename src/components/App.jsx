@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef} from "react";
+import { useCallback, useEffect, useReducer, useRef} from "react";
 import { nanoid } from 'nanoid'
 import { getImage } from "./Api";
 import { ImageGallery } from "./ImageGallery";
@@ -12,12 +12,12 @@ const spinner = document.getElementById('spinner');
 const modal = document.getElementById('modal');
 
 function reducer(state, action) {
-  
+  // console.log(action)
   switch (Object.keys(action)[0]) {
     case 'query': 
       return {...state, ...{isQuery: action.query}, ...{objImg: []}, ...{page: 1}};
-    case 'objImg':
-      return {...state, ...action.objImg};
+    case 'objImg': 
+      return {...state, ...action.objImg, ...{objImg: [...state.objImg, ...action.objImg.objImg]}};
     case 'isModalOpen': 
       return {...state, ...{isModalOpen: action.isModalOpen}};
     case 'isLoading':
@@ -45,12 +45,12 @@ const initialState={
 export const App = ()=>{
   const [state, dispatch] = useReducer(reducer, initialState);
   const btn = useRef(null);
-  const getImagePage = ()=>{
+  const getImagePage = useCallback(()=>{
     try{
       getImage(state.isQuery, state.page)
       .then(({data})=>{
             const objImg = data.hits.map((el)=>({id: nanoid(), webformatURL: el.webformatURL, largeImageURL: el.largeImageURL}));
-            dispatch({objImg: {objImg:[...state.objImg, ...objImg], totalPage: data.totalHits, isLoading: false}});
+            dispatch({objImg: {objImg:[...objImg], totalPage: data.totalHits, isLoading: false}});
             
           });
     }catch(error){
@@ -58,7 +58,7 @@ export const App = ()=>{
       dispatch({error});
       
     }
-  }
+  },[state.isQuery, state.page])
   
   useEffect(()=>{
     if(state.isQuery){
@@ -66,8 +66,8 @@ export const App = ()=>{
       getImagePage();
       btn.current?.removeAttribute('disabled');
     }
-// eslint-disable-next-line
-  },[state.isQuery, state.page]);
+
+  },[state.isQuery, state.page, getImagePage]);
 
   function handleSubmit(query) {
     dispatch({ query });
